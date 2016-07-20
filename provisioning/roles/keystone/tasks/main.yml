@@ -1,0 +1,7 @@
+# Include all the variables and tasks
+
+---
+
+- include: install.yml
+- include: configure.yml
+- include: postdeploy.yml

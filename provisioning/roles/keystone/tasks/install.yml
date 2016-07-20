@@ -1,0 +1,109 @@
+---
+
+- name : keystone |  Install keystone from github
+  git:
+     repo: "https://github.com/openstack/keystone.git"
+     dest: "/opt/stack/openstack/keystone"
+     version: master
+     update :  false
+     
+     
+- name: keystone |  Install python-openstackclient from github
+  git:
+     repo: "https://github.com/openstack/python-openstackclient.git"
+     dest: "/opt/stack/openstack/openstackclient"
+     version: master
+     update :  false
+     
+- name: keystone | Install prerequisite packages for keystone
+  apt: state=latest name={{ item }}
+  sudo: yes
+  with_items: 
+    - python-mysqldb
+    - xmlsec1
+    - libsqlite3-dev 
+    - libldap2-dev 
+    - libsasl2-dev 
+    - libssl-dev 
+    - libxml2-dev 
+    - libxslt1-dev 
+    - libffi-dev
+
+- name: keystone | Remove the stop pip 
+  apt: name=pip state=absent
+
+- name: keystone | Install pip via easy_install as stock pip is old version
+# state attribute is available only in ansible 2.0
+# easy_install: name=pip state=latest
+  command: easy_install -U pip
+
+- name: keystone | remove the hash for the pip
+  command: hash -r 
+  ignore_errors: true
+
+- name: keystone | Install keystone
+  command: python setup.py install
+  args:
+    chdir: "/opt/stack/openstack/keystone"
+ 
+- name: keystone | Install Openstack client
+  command: python setup.py install
+  args:
+    chdir: "/opt/stack/openstack/openstackclient"
+    
+- name: keystone | Install the requirements as setup doesn't install everything
+  command: pip install -U -r ./requirements.txt
+  args:
+    chdir: /opt/stack/openstack/keystone
+    
+- name: keystone | Install the requirements as setup doesn't install everything
+  command: pip install -U -r ./requirements.txt
+  args:
+    chdir: /opt/stack/openstack/openstackclient
+    
+- name:  keystone | create a keystone group   
+  group: name=keystone state=present
+   
+  #Modwsgi doesn't work with a user without home. So set it as /tmp
+- name: keystone | creates a keystone user 
+  user: name=keystone comment="Keystone user"  group=keystone  home=/tmp state=present
+   
+- name: keystone | creates config log and www directories
+  file: path={{ item }}  state=directory owner=keystone group=keystone
+  with_items:
+    - /etc/keystone
+    - /var/log/keystone
+    - /var/www/keystone 
+    - /etc/keystone/fernet-keys/
+  
+- name: kesytone | Copies modwsgi directory
+  copy: src=keystone-modwsgi.conf dest=/etc/apache2/sites-available 
+
+- name:  keystone | Enable wsgi module in apache 
+  command: a2enmod wsgi
+
+- name:  keystone | Enable keystone site 
+  command: a2ensite keystone-modwsgi
+    
+- name: kesytone | Copies log and conf file 
+  copy: src={{ item }} dest=/etc/keystone
+  with_items:
+      - keystone.conf
+      - logging.conf
+      
+- name: keystone | Use these config file from installation itself
+  command: chdir=/opt/stack/openstack/keystone/etc cp  {{ item }}  /etc/keystone
+  with_items:
+    - keystone-paste.ini
+    - policy.json
+  
+- name: keystone | create symlink to main and admin
+  file: src=/opt/stack/openstack/keystone/httpd/keystone.py  dest=/var/www/keystone/{{ item }} state=link
+  with_items:
+    - main
+    - admin
+  
+- name: keystone | copy stackrc file for refeence
+  copy: src=stackrc dest=/opt/stack/openstack mode=0666
+  
+  

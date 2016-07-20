@@ -1,0 +1,11 @@
+---
+# Install few tool and utilities
+
+- name: common | update the apt cache
+  apt: update_cache=yes
+  sudo: yes
+  
+- name: common | Install dev tools
+  apt: state=latest name={{ item.key }}
+  sudo: yes
+  with_dict: dev_env_packages

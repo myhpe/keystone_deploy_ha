@@ -1,0 +1,90 @@
+#==================================================================================
+Q & A (Thomas - Haneef)
+
+Q:
+To try https://github.com/haneefs/keystone_deploy, if I use my windows laptop with virtualbox (A) installed, could I do Vagrant/Ansible/Another Virtualbox (Sub-A) within one of the VM of of Virtualbox (A)? or any suggestion?
+A:
+No, you have to do it differnet way:
+1. clone keystone-deploy in ur virtual box
+2. then create a file called say localhost with content as localhost ansible_connection=local
+3. Make sure you have ansible installed in ur virtual box
+4. Then do ansible-playbook -i <file u created> provisioning/keystone_standalone.yml
+Note: Basically you are just running provisioning in your vm instead of creating a vm and running provisioning
+
+Q:
+So I don't need Vagrant installed in the Virtualbox for this case?
+A: yes
+
+Q:
+The instruction in https://github.com/haneefs/keystone_deploy is for the case that the user has baremetal (Ubuntu) to deploy keystone in a Virtualbox, is that correct?
+A: yes
+#==================================================================================
+I applied Haneef's keystone-deploy provisoning in my vm and deployed keystone stuffs. I got "openstack token issue" running successfully...
+
+The detail steps as shown below:
+
+Apply Haneef's keystone-deploy for Keystone deployment from a VM of Laptop Virtualbox
+(https://github.com/haneefs/keystone_deploy)
+-------------------------------------------------------------------------------------------
+$ sudo apt-get install ansible
+
+thsiao@thsiao-VirtualBox:~$ mkdir work
+thsiao@thsiao-VirtualBox:~$ cd work
+thsiao@thsiao-VirtualBox:~/work$ mkdir ansible
+thsiao@thsiao-VirtualBox:~/work$ cd ansible/
+thsiao@thsiao-VirtualBox:~/work/ansible$ mkdir etc
+thsiao@thsiao-VirtualBox:~/work/ansible$ cd etc
+thsiao@thsiao-VirtualBox:~/work/ansible/etc$ echo "localhost ansible_connection=local" > localhost
+thsiao@thsiao-VirtualBox:~/work/ansible/etc$ ls
+localhost
+
+thsiao@thsiao-VirtualBox:~/work/ansible/etc# sudo apt-get install git
+thsiao@thsiao-VirtualBox:~/work/ansible/etc$ sudo apt-get -y install python-pip
+
+    Errors encountered in the office network
+    thsiao@thsiao-VirtualBox:~/work/ansible/etc$ sudo pip install ansible
+    Downloading/unpacking ansible
+    Cannot fetch index base URL https://pypi.python.org/simple/
+    Could not find any downloads that satisfy the requirement ansible
+    Cleaning up...
+    No distributions at all found for ansible
+    Storing debug log for failure in /home/thsiao/.pip/pip.log
+
+    Resolution
+    thsiao@thsiao-VirtualBox:~/work/ansible/etc$ sudo -s
+    root@thsiao-VirtualBox:~/work/ansible/etc# pip install ansible
+
+root@thsiao-VirtualBox:~/work/ansible/etc# cd ..
+root@thsiao-VirtualBox:~/work/ansible# git clone https://github.com/haneefs/keystone_deploy.git
+root@thsiao-VirtualBox:~/work/ansible# cd keystone_deploy/
+root@thsiao-VirtualBox:~/work/ansible/keystone_deploy# sudo ansible-playbook -i /home/thsiao/work/ansible/etc/localhost provisioning/keystone_standalone.yml
+
+-------------------------------------------------------------------------------------------
+Verification
+
+thsiao@thsiao-VirtualBox:~$ cd /opt/stack/openstack
+thsiao@thsiao-VirtualBox:/opt/stack/openstack$ ls
+keystone openstackclient stackrc
+thsiao@thsiao-VirtualBox:/opt/stack/openstack$ source stackrc
+thsiao@thsiao-VirtualBox:/opt/stack/openstack$ openstack token issue
+
+
+#==================================================================================
+
+###############################################
+# install virtual env package
+sudo apt-get install python-virtualenv
+cd keystone
+virtualenv .venv
+. .venv/bin/activate
+pip install -e .
+
+
+#==================================================================================
+
+
+
+
+
+#==================================================================================
+

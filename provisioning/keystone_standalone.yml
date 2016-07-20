@@ -1,0 +1,12 @@
+# Top level playybook for installing  keystone
+
+---
+
+- hosts: all  
+  roles:
+     - common
+     - apache
+     - sql
+     - keystone
+     - keystone_data
+

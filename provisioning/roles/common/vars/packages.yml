@@ -1,0 +1,11 @@
+# Packages required for dev environment
+---
+
+dev_env_packages:
+    curl:
+    git:
+    python-dev:
+    python-pip:
+    python-virtualenv:
+    crudini:
+    

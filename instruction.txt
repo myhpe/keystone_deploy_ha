@@ -81,8 +81,14 @@ pip install -e .
 
 
 #==================================================================================
+[Issue]
+TASK: [common | common | update the apt cache] ******************************** 
+failed: [localhost] => {"failed": true}
+msg: Could not fetch updated apt files
+FATAL: all hosts have already failed -- aborting
 
-
+[Solution]
+$ sudo apt update
 
 
 

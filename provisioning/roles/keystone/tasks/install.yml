@@ -2,7 +2,9 @@
 
 - name : keystone |  Install keystone from github
   git:
-     repo: "https://github.com/openstack/keystone.git"
+     #repo: "https://github.com/openstack/keystone.git"
+     # --- HPE keystone ---
+     repo: "http://git.gozer.hpcloud.net/openstack/keystone"
      dest: "/opt/stack/openstack/keystone"
      version: master
      update :  false
@@ -10,7 +12,9 @@
      
 - name: keystone |  Install python-openstackclient from github
   git:
-     repo: "https://github.com/openstack/python-openstackclient.git"
+     #repo: "https://github.com/openstack/python-openstackclient.git"
+     # --- HPE Openstack client ---
+     repo: "http://git.gozer.hpcloud.net/openstack/python-openstackclient"
      dest: "/opt/stack/openstack/openstackclient"
      version: master
      update :  false
@@ -40,6 +44,12 @@
 - name: keystone | remove the hash for the pip
   command: hash -r 
   ignore_errors: true
+
+# --- create & switch to branch hp/prerelease/mitaka ---
+- name: keystone | create & switch to branch hp/prerelease/mitaka
+  command: git checkout -b hp/prerelease/mitaka -t origin/hp/prerelease/mitaka
+  args:
+    chdir: "/opt/stack/openstack/keystone"
 
 - name: keystone | Install keystone
   command: python setup.py install
